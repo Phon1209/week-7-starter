@@ -1,8 +1,8 @@
 # FunSwitch
 
 Shared workspace for the Firebase backend and Expo mobile app described in
-[the plan](docs/Plan.md). Phase 0 and the Firebase backend (Part A) are
-implemented. The Expo mobile app is the next phase.
+[the plan](docs/Plan.md). The Firebase backend and Expo mobile UI are integrated
+through the shared API contract.
 
 Requires Node.js 22.13 or newer, npm, and Java 21+ for the Firestore emulator.
 
@@ -14,8 +14,9 @@ npm run typecheck
 
 The workspace uses `packages/*` and `apps/*`. `packages/contract` exports the
 platform-independent API, types, validation and formatting helpers.
-`packages/backend` implements the Firebase adapter; `apps/mobile` is reserved
-for the Expo app.
+`packages/backend` implements the Firebase adapter; `apps/mobile` contains
+the Expo app. See [the mobile README](apps/mobile/README.md) for Firebase and
+mock mode setup.
 
 Start the local backend and seed it from another terminal:
 
@@ -52,15 +53,15 @@ uses shared matchers and no test framework imports. For a mock with zero write
 latency, return `latencyMs: 0` to omit the pending-write assertion. The suite
 uses real timers, including presence TTL expiry; consumers using fake timers
 must advance them while promises are pending. All 19 cases pass against the
-Firebase adapter; the future mock must pass the same suite.
+Firebase adapter and the mobile mock adapter.
 
 ## Firebase configuration
 
 [.env.example](.env.example) lists all Expo Firebase variables and emulator host
-examples. Once `apps/mobile` exists, copy it to `apps/mobile/.env`. Defaults
+examples. Copy it to `apps/mobile/.env`. Defaults
 target `demo-funswitch` emulators. For a real project, replace the web app
 configuration and set `EXPO_PUBLIC_USE_EMULATORS=false`. These variables will
-be read by the future app. The backend accepts initialized Auth and Firestore
+be read by the app. The backend accepts initialized Auth and Firestore
 instances from that app.
 
 To make a read-only check using your existing root `.env`, run
