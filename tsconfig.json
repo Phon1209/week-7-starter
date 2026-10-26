@@ -13,9 +13,7 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.tsx",
-    "expo-env.d.ts",
-    ".expo/types/**/*.ts"
+    "src/**/*.tsx"
   ],
   "exclude": [
     "node_modules",
