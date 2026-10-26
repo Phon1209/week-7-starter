@@ -105,7 +105,7 @@ The repository's `.env.example` contains the Expo variables:
 
 For phones use your computer's LAN IP; for the Android emulator use `10.0.2.2`;
 for the iOS simulator use `127.0.0.1`. The app will need its configuration in
-`apps/mobile/.env`. A real project must have Email/Password sign-in enabled.
+`.env`. A real project must have Email/Password sign-in enabled.
 
 Your existing root `.env` can be checked now:
 

@@ -8,15 +8,19 @@ Requires Node.js 22.13 or newer, npm, and Java 21+ for the Firestore emulator.
 
 ```sh
 npm install
+npm start
 npm test
 npm run typecheck
 ```
 
-The workspace uses `packages/*` and `apps/*`. `packages/contract` exports the
-platform-independent API, types, validation and formatting helpers.
-`packages/backend` implements the Firebase adapter; `apps/mobile` contains
-the Expo app. See [the mobile README](apps/mobile/README.md) for Firebase and
-mock mode setup.
+The Expo app lives at the repository root, with its screens in `src/app/`,
+assets in `assets/`, and dependencies in the top-level `package.json`.
+`packages/contract` exports the shared API, types, validation and formatting
+helpers. `packages/backend` implements the Firebase adapter. See
+[the mobile setup guide](docs/mobile.md) for Firebase and mock mode setup.
+
+Run `npm start`, `npm run android`, `npm run ios`, or `npm run web` from the
+root. `npm run test:mobile` runs the app tests; `npm test` runs all suites.
 
 Start the local backend and seed it from another terminal:
 
@@ -58,7 +62,7 @@ Firebase adapter and the mobile mock adapter.
 ## Firebase configuration
 
 [.env.example](.env.example) lists all Expo Firebase variables and emulator host
-examples. Copy it to `apps/mobile/.env`. Defaults
+examples. Copy it to `.env`. Defaults
 target `demo-funswitch` emulators. For a real project, replace the web app
 configuration and set `EXPO_PUBLIC_USE_EMULATORS=false`. These variables will
 be read by the app. The backend accepts initialized Auth and Firestore

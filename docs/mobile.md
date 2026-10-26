@@ -8,13 +8,13 @@ From the repository root, install dependencies with `npm install`.
 
 ## Firebase emulators
 
-Copy `apps/mobile/.env.emulator` to `apps/mobile/.env`. Start and seed the
+Copy `.env.emulator` to `.env`. Start and seed the
 backend in separate terminals:
 
 ```sh
 npm run emulators
 npm run seed
-npm run start -w apps/mobile
+npm start
 ```
 
 Requires Java 21+ for Firestore. Demo accounts are `maya@demo.test`,
@@ -26,11 +26,11 @@ uses the demo emulators and chooses the host for the platform.
 ## Real Firebase
 
 Copy the public Expo settings from the root `.env.example` into
-`apps/mobile/.env`, fill in your Firebase web app settings, and set
+`.env`, fill in your Firebase web app settings, and set
 `EXPO_PUBLIC_USE_EMULATORS=false`. Enable Email/Password authentication and
 deploy this repository's Firestore rules and indexes to that project as
-described in [the backend README](../../packages/backend/README.md).
-Expo reads the app's `.env`; the root `.env` is used by backend CLI checks.
+described in [the backend README](../packages/backend/README.md).
+The Expo app and backend CLI checks both read the root `.env`.
 Restart Expo after changing environment variables. Local `.env` files stay
 ignored by Git.
 
@@ -44,9 +44,9 @@ Mock accounts and device state persist in AsyncStorage.
 ## Verification
 
 ```sh
-npm test -w apps/mobile -- --runInBand
+npm run test:mobile -- --runInBand
 npm run typecheck
-npm run lint -w apps/mobile
+npm run lint
 ```
 
 Tests cover Firebase initialization/configuration and all 19 shared contract

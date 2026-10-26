@@ -36,7 +36,7 @@ yarn-error.*
 
 # Keep the example configuration tracked
 !.env.example
-!apps/mobile/.env.emulator
+!.env.emulator
 
 # typescript
 *.tsbuildinfo

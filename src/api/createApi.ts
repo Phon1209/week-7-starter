@@ -23,7 +23,7 @@ export function createApi(mode: string = process.env.EXPO_PUBLIC_API_MODE ?? 'fi
     const projectId = process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ?? (useEmulators ? 'demo-funswitch' : undefined);
     const apiKey = process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? (useEmulators ? 'fake' : undefined);
     const host = process.env.EXPO_PUBLIC_EMULATOR_HOST ?? (Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1');
-    if (!projectId || !apiKey) throw new Error('Set the Firebase project ID and API key in apps/mobile/.env.');
+    if (!projectId || !apiKey) throw new Error('Set the Firebase project ID and API key in .env.');
     if (useEmulators && (!host || host.includes('/') || host.includes(':'))) {
       throw new Error('EXPO_PUBLIC_EMULATOR_HOST must be a hostname without a scheme or port.');
     }

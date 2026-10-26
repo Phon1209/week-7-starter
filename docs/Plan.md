@@ -65,7 +65,9 @@ funswitch/
   firestore.indexes.json
   packages/contract/        # Phase 0, frozen
   packages/backend/         # Server agent
-  apps/mobile/              # UI agent (Expo SDK 58)
+  src/app/                  # Expo Router screens (SDK 58)
+  assets/                   # Expo app assets
+  app.json                  # Expo configuration
   CONTRACT_CHANGES.md       # change requests only
 ```
 
@@ -82,7 +84,7 @@ Navigation is flat. Home is one ungrouped grid, and tapping a tile opens that de
 
 ### Design tokens
 
-Put these in `apps/mobile/src/theme/tokens.ts` as a typed object. Components style themselves with `StyleSheet.create`.
+Put these in `src/theme/tokens.ts` as a typed object. Components style themselves with `StyleSheet.create`.
 
 | Token          | Value                                                               | Use                                  |
 | -------------- | ------------------------------------------------------------------- | ------------------------------------ |
@@ -190,7 +192,7 @@ At width ≥ 900 the main panel and the right column sit side by side. Below tha
 
 **Tasks**
 
-1. Create the root `package.json` with workspaces `["packages/*", "apps/*"]`.
+1. Create the root `package.json` with workspaces `["packages/*"]` and the Expo app dependencies and scripts.
 2. Add a strict `tsconfig.base.json`, and Vitest configured with `globals: true`.
 3. Create `packages/contract/src/index.ts`.
 4. The contract package must be pure TypeScript:
@@ -699,7 +701,7 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
 
 **Tasks**
 
-1. Create `apps/mobile` with `npx create-expo-app@latest`, choosing SDK 58 with the TypeScript and Expo Router template. Remove the example screens.
+1. Set up the Expo app at the repository root using SDK 58 with TypeScript and Expo Router. Keep its dependencies and scripts in the top-level `package.json`. Remove the example screens.
 2. Check that Node is 22.13 or newer.
 3. Add `@funswitch/contract` as a workspace dependency. Expo's Metro config resolves workspaces automatically, so don't add custom `watchFolders` unless resolution fails.
 4. Install these with `npx expo install`:
@@ -726,7 +728,7 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
 - `Login.test.tsx` renders the login screen and finds "funSwitch".
 - `Avatar.test.tsx` checks that `jas@x.com` renders "J" and that the color is stable for the same uid.
 
-**Run:** `npm test -w apps/mobile && npx tsc --noEmit -p apps/mobile && npx expo-doctor`.
+**Run:** `npm run test:mobile && npm run typecheck:mobile && npx expo-doctor`.
 
 ### M2: Development build and Maestro smoke test
 
@@ -734,12 +736,12 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
 
 1. Build and launch a development build with `npx expo run:ios` (or `run:android`).
 2. Install the Maestro CLI.
-3. Add `apps/mobile/e2e/flows/smoke.yaml`. It launches the app and asserts "funSwitch" is visible.
+3. Add `e2e/flows/smoke.yaml`. It launches the app and asserts "funSwitch" is visible.
 4. Give important elements a `testID` in kebab-case, such as `login-email`, `device-tile-<id>` and `wall-switch`.
 
 **Test:** the smoke flow passes on one simulator.
 
-**Run:** `maestro test apps/mobile/e2e/flows/smoke.yaml`.
+**Run:** `maestro test e2e/flows/smoke.yaml`.
 
 ### M3: Mock API, provider, hooks and Dev Simulator
 
@@ -782,7 +784,7 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
   - `useTimedSave` records a number greater than or equal to 0
 - `DevSimulator.test.tsx` checks that pressing "Sam flips this" changes the device state and writes an activity event whose actor is Sam.
 
-**Run:** `npm test -w apps/mobile && npx tsc --noEmit -p apps/mobile`.
+**Run:** `npm run test:mobile && npm run typecheck:mobile`.
 
 ### M4: Login and signup screens
 
@@ -820,7 +822,7 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
 - the protected redirect works
 - sign-out works
 
-**Run:** `npm test -w apps/mobile -- auth && npx tsc --noEmit -p apps/mobile`.
+**Run:** `npm run test:mobile -- auth && npm run typecheck:mobile`.
 
 ### M5: Home grid (image 1)
 
@@ -841,7 +843,7 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
 - B removes a device and its tile disappears
 - pressing a tile calls `router.push('/devices/<id>')`, with Expo Router's `router` mocked
 
-**Run:** `npm test -w apps/mobile -- HomeScreen && npx tsc --noEmit -p apps/mobile`.
+**Run:** `npm run test:mobile -- HomeScreen && npm run typecheck:mobile`.
 
 ### M6: Add Switch screen
 
@@ -862,7 +864,7 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
 - a valid submit calls `add({ name: 'Desk Lamp', type: 'light' })` with the trimmed name, then `router.replace('/devices/<id>')`
 - Cancel calls `router.back()`
 
-**Run:** `npm test -w apps/mobile -- AddSwitch && npx tsc --noEmit -p apps/mobile`.
+**Run:** `npm run test:mobile -- AddSwitch && npm run typecheck:mobile`.
 
 ### M7: Device screen, main panel (image 2)
 
@@ -900,7 +902,7 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
 - **Delete:** with `Alert.alert` mocked to press "Delete", `remove` is called and the app navigates home.
 - **Remote removal:** shows the removed state.
 
-**Run:** `npm test -w apps/mobile -- DeviceMain && npx tsc --noEmit -p apps/mobile`.
+**Run:** `npm run test:mobile -- DeviceMain && npm run typecheck:mobile`.
 
 ### M8: Flip history panel
 
@@ -919,7 +921,7 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
 - B's event appears at the top live
 - events from other devices are excluded
 
-**Run:** `npm test -w apps/mobile -- FlipHistory && npx tsc --noEmit -p apps/mobile`.
+**Run:** `npm run test:mobile -- FlipHistory && npm run typecheck:mobile`.
 
 ### M9: "In the room now" and "Database check" panels, plus layout
 
@@ -948,7 +950,7 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
 - live updates counts B's flip but not the screen load
 - the layout renders in a row when `useWindowDimensions` is mocked to width 1024, and as a column at width 390
 
-**Run:** `npm test -w apps/mobile -- RightColumn && npx tsc --noEmit -p apps/mobile`.
+**Run:** `npm run test:mobile -- RightColumn && npm run typecheck:mobile`.
 
 ### M10: Maestro end-to-end test on the mock
 
@@ -970,8 +972,8 @@ npx firebase emulators:exec --only auth,firestore "npm run seed -w packages/back
 **Run:**
 
 ```
-maestro test apps/mobile/e2e/flows/mock_full.yaml
-npm test -w apps/mobile && npx tsc --noEmit -p apps/mobile && npx expo-doctor
+maestro test e2e/flows/mock_full.yaml
+npm run test:mobile && npm run typecheck:mobile && npx expo-doctor
 ```
 
 ---
@@ -984,7 +986,7 @@ Run this after both agents finish.
 
 **Tasks**
 
-1. Add `@funswitch/backend` to `apps/mobile`.
+1. Add `@funswitch/backend` to the root app's dependencies.
 2. In the `firebase` branch of `createApi.ts`:
    1. Call `initializeApp` with the `EXPO_PUBLIC_FIREBASE_*` variables.
    2. Initialize Auth with `initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) })`.
@@ -999,7 +1001,7 @@ Run this after both agents finish.
 | Android emulator | `10.0.2.2`                  |
 | Physical phone   | your computer's LAN IP      |
 
-4. Add `apps/mobile/.env.emulator`:
+4. Add `.env.emulator`:
 
    ```
    EXPO_PUBLIC_API_MODE=firebase
@@ -1016,7 +1018,7 @@ Run this after both agents finish.
 - each mode returns the correct implementation
 - the emulator host from the environment is passed to both connect functions
 
-**Run:** `npm test -w apps/mobile -- createApi && npx tsc --noEmit -p apps/mobile`.
+**Run:** `npm run test:mobile -- createApi && npm run typecheck:mobile`.
 
 ### I2: Cross-check conformance
 
@@ -1025,7 +1027,7 @@ Run this after both agents finish.
 ```
 npm run test -w packages/contract
 npm run test -w packages/backend
-npm test -w apps/mobile -- conformance
+npm run test:mobile -- conformance
 ```
 
 All 19 cases must pass under both Vitest and Jest. Resolve any differences against the contract. Log any genuine gap in `CONTRACT_CHANGES.md` and agree on it with both sides before patching.
@@ -1046,7 +1048,7 @@ All 19 cases must pass under both Vitest and Jest. Resolve any differences again
 **Run:**
 
 ```
-npx firebase emulators:exec --only auth,firestore "bash apps/mobile/e2e/run_firebase.sh"
+npx firebase emulators:exec --only auth,firestore "bash e2e/run_firebase.sh"
 ```
 
 ### I4: Manual checklist and release build
