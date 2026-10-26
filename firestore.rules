@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null; }
+    function actorIsMe(a) {
+      return a is map && a.keys().hasOnly(['uid', 'email'])
+        && a.uid == request.auth.uid && a.email == request.auth.token.email;
+    }
+    function validDevice(d) {
+      return d.name is string && d.name.size() >= 1 && d.name.size() <= 40
+        && d.createdAt is timestamp && d.updatedAt is timestamp
+        && d.createdBy is string && d.flipCount is int && d.flipCount >= 0
+        && ((d.control == 'switch' && d.type in ['light', 'plug']
+              && d.keys().hasOnly(['name', 'type', 'control', 'on', 'createdAt', 'createdBy', 'updatedAt', 'lastChangedBy', 'flipCount'])
+              && d.on is bool)
+          || (d.control == 'slider' && d.type in ['dimmer', 'fan', 'blinds', 'speaker']
+              && d.keys().hasOnly(['name', 'type', 'control', 'level', 'createdAt', 'createdBy', 'updatedAt', 'lastChangedBy', 'flipCount'])
+              && d.level is int && d.level >= 0 && d.level <= 100));
+    }
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['email', 'createdAt'])
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.createdAt is timestamp;
+    }
+    match /devices/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && validDevice(request.resource.data)
+        && request.resource.data.createdBy == request.auth.uid
+        && actorIsMe(request.resource.data.lastChangedBy)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.flipCount == 0
+        && (request.resource.data.control == 'switch' ? request.resource.data.on == false : request.resource.data.level == 0);
+      allow update: if signedIn() && validDevice(request.resource.data)
+        && actorIsMe(request.resource.data.lastChangedBy)
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['on', 'level', 'updatedAt', 'lastChangedBy', 'flipCount'])
+        && request.resource.data.flipCount == resource.data.flipCount + 1;
+      allow delete: if signedIn();
+    }
+    match /activity/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && actorIsMe(request.resource.data.actor)
+        && request.resource.data.keys().hasOnly(['deviceId', 'deviceName', 'actor', 'action', 'level', 'at'])
+        && request.resource.data.deviceId is string && request.resource.data.deviceName is string
+        && request.resource.data.at == request.time
+        && (request.resource.data.action in ['added', 'turned_on', 'turned_off', 'removed']
+            ? !('level' in request.resource.data)
+            : request.resource.data.action == 'set_level' && request.resource.data.level is int
+              && request.resource.data.level >= 0 && request.resource.data.level <= 100);
+      allow update, delete: if false;
+    }
+    match /presence/{deviceId}/viewers/{uid} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['email', 'lastSeen'])
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.lastSeen == request.time;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+  }
+}

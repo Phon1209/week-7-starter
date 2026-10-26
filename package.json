@@ -12,10 +12,21 @@
   ],
   "scripts": {
     "test": "npm run test --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "emulators": "firebase emulators:start --only auth,firestore --project demo-funswitch",
+    "seed": "npm run seed -w packages/backend",
+    "check:firebase": "npm run check:firebase -w packages/backend"
   },
   "devDependencies": {
+    "@types/node": "^26.6.5",
+    "firebase-tools": "^15.34.1",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vitest": "^5.0.5"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.6",
+    "@google-cloud/pubsub": { "@opentelemetry/core": "^2.8.0" },
+    "gaxios@6.7.1": { "uuid": "^11.1.1" }
   }
 }
